@@ -15,8 +15,12 @@ function setMap(){
       	areas = data[1];
         states = data[2];
 
-        console.log(csvData);
-        console.log(areas);
-        console.log(states);
+        //translate europe TopoJSON
+        var chicagoAreas = topojson.feature(areas, areas.objects.Chicago_Neighborhoods),
+            stateRegions = topojson.feature(states, states.objects.states);
+
+        //examine the results
+        console.log(chicagoAreas);
+        console.log(stateRegions);
     };
 };
