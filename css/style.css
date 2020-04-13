@@ -20,13 +20,19 @@
 }
 
 .states {
-    fill:#FEFCC3;
-    stroke: #FFAC24;
-    stroke-width: 3px;
+    fill:#D0E0FD;
+    stroke: #5477FF;
+    stroke-width: 2px;
 }
 
 .neighborhood {
     fill:#B7DFF5;
     stroke: #000000;
     stroke-width: 1px
+}
+
+.community {
+    stroke: #000;
+    stroke-width: 0.5px;
+    stroke-linecap: round;
 }
