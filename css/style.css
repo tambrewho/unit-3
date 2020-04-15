@@ -31,12 +31,6 @@
     stroke-width: 1px
 }
 
-.community {
-    stroke: #000;
-    stroke-width: 0.5px;
-    stroke-linecap: round;
-}
-
 .map {
     border: medium solid #999;
     margin: 10px 0 0 20px;
@@ -93,4 +87,44 @@
 
 option {
     font-weight: normal;
+}
+
+.infolabel {
+    margin: 0 20px 0 0;
+    position: absolute;
+    height: 50px;
+    min-width: 100px;
+    color: #fff;
+    background-color: #000;
+    border: solid thin #fff;
+    padding: 5px 10px;
+    top: -75px;
+}
+
+.infolabel h1 {
+    margin: 0 20px 0 0;
+    padding: 0;
+    display: inline-block;
+    line-height: 1em;
+}
+
+.plot {
+    background-color: #b0b0b0;
+    border: medium solid #5a5a5a;
+    float: right;
+    margin: -170px 10px 30px -20px;
+}
+
+.plotAxis {
+    font-size: 0.6em;
+}
+
+.plotTitles {
+    font-size: 1.1em;
+    font-weight: 650;
+}
+
+
+a:link, a:visited {
+    color: #79a6cf;
 }

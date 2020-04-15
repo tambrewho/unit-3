@@ -76,17 +76,6 @@
               .attr("class", "states")
               .attr("d", path);
 
-          //.community is different as the map will select all from the chicagoNeighborhoods data and then brings it in.
-          var chi = map.selectAll(".neighborhood")
-              .data(chicagoCrimes)
-              .enter()
-              .append("path")
-              //draws the boundaries of each neighborhood
-              .attr("class", function(d){
-                  return "neighborhood " + d.properties.Neighborhood;
-              })
-              .attr("d", path);
-
           //create color scale
           var colorScale = makeColorScale(csvData);
 
@@ -94,6 +83,8 @@
           setEnumerationUnits(chicagoCrimes, map, path, colorScale);
           // set chart values
           setChart(csvData, colorScale);
+          // set parallel plot
+          setParallelPlot(csvData);
           //create dropdown menu
           createDropdown(csvData);
         };
@@ -153,15 +144,6 @@
 
   //function to create coordinated bar chart
   function setChart(csvData, colorScale){
-    //chart frame dimensions
-    var chartWidth = window.innerWidth * 0.425,
-        chartHeight = 473,
-        leftPadding = 25,
-        rightPadding = 2,
-        topBottomPadding = 5,
-        chartInnerWidth = chartWidth - leftPadding - rightPadding,
-        chartInnerHeight = chartHeight - topBottomPadding * 2,
-        translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
 
     //create a second svg element to hold the bar chart
     var chart = d3.select("body")
@@ -200,9 +182,16 @@
         .attr("class", function(d){
             return "bar " + d.Neighborhood;
         })
-        .attr("width", chartInnerWidth / csvData.length - 1);
+        .attr("width", chartInnerWidth / csvData.length - 1)
+        .on("mouseover", highlight)
+        .on("mouseout", dehighlight)
+        .on("mousemove", moveLabel);
 
-    // create a text element for the chart title
+    //add style descriptor to each rect
+    var desc = bars.append("desc")
+        .text('{"stroke": "none", "stroke-width": "0px"}');
+
+    //create a text element for the chart title
     var chartTitle = chart.append("text")
         .attr("x", 40)
         .attr("y", 40)
@@ -225,7 +214,7 @@
 
   // function for setting default enumeration units
   function setEnumerationUnits(chicagoCrimes, map, path, colorScale){
-      var regions = map.selectAll(".community")
+      var regions = map.selectAll(".neighborhood")
           .data(chicagoCrimes)
           .enter()
           .append("path")
@@ -236,11 +225,22 @@
           .style("fill", function(d){
               var value = d.properties[expressed];
               if(value) {
-              	return colorScale(d.properties[expressed]);
+              	return colorScale(value);
               } else {
               	return "#ccc";
               }
-      });
+          })
+          .on("mouseover", function(d){
+              highlight(d.properties);
+          })
+          .on("mouseout", function(d){
+              dehighlight(d.properties);
+          })
+          .on("mousemove", moveLabel);
+
+    //add style descriptor to each path
+    var desc = regions.append("desc")
+        .text('{"stroke": "#000", "stroke-width": "1px"}');
   };
 
   //function to create a dropdown menu for attribute selection
@@ -312,7 +312,6 @@ function updateChart(bars, n, colorScale){
         })
         //size/resize bars
         .attr("height", function(d, i){
-          console.log("test height: " + parseFloat(d[expressed]));
             return 463 - yScale(parseFloat(d[expressed]));
         })
         .attr("y", function(d, i){
@@ -331,6 +330,156 @@ function updateChart(bars, n, colorScale){
     //add text to chart title
      var chartTitle = d3.select(".chartTitle")
          .text("Number of Variable " + expressed[3] + " in each region");
+
+  };
+
+  //function to highlight enumeration units and bars
+  function highlight(props){
+      //change stroke
+      var selected = d3.selectAll("." + props.Neighborhood)
+          .style("stroke", "blue")
+          .style("stroke-width", "2");
+
+      // create label when highlighted
+      setLabel(props);
+  };
+
+  //function to reset the element style on mouseout
+  function dehighlight(props){
+      var selected = d3.selectAll("." + props.Neighborhood)
+          .style("stroke", function(){
+              return getStyle(this, "stroke");
+          })
+          .style("stroke-width", function(){
+              return getStyle(this, "stroke-width");
+          });
+
+      function getStyle(element, styleName){
+          var styleText = d3.select(element)
+              .select("desc")
+              .text();
+
+          var styleObject = JSON.parse(styleText);
+
+          return styleObject[styleName];
+      };
+      // remove info label
+      d3.select(".infolabel")
+          .remove();
+  };
+
+  //function to create dynamic label
+  function setLabel(props){
+      //label content
+      var labelAttribute = "<h1>" + props[expressed] +
+          "</h1><b>" + expressed + "</b>";
+
+      //create info label div
+      var infolabel = d3.select("body")
+          .append("div")
+          .attr("class", "infolabel")
+          .attr("id", props.adm1_code + "_label")
+          .html(labelAttribute);
+
+      var regionName = infolabel.append("div")
+          .attr("class", "labelname")
+          .html(props.name);
+  };
+
+  //function to move info label with mouse
+  function moveLabel(){
+      //get width of label
+      var labelWidth = d3.select(".infolabel")
+          .node()
+          .getBoundingClientRect()
+          .width;
+
+      //use coordinates of mousemove event to set label coordinates
+      var x1 = d3.event.clientX + 10,
+          y1 = d3.event.clientY - 75,
+          x2 = d3.event.clientX - labelWidth - 10,
+          y2 = d3.event.clientY + 25;
+
+      //horizontal label coordinate, testing for overflow
+      var x = d3.event.clientX > window.innerWidth - labelWidth - 20 ? x2 : x1;
+      //vertical label coordinate, testing for overflow
+      var y = d3.event.clientY < 75 ? y2 : y1;
+
+      d3.select(".infolabel")
+          .style("left", x + "px")
+          .style("top", y + "px");
+  };
+
+  // function for creating parallel plot
+  function setParallelPlot(csvData){
+      // plot margins
+      var margin = {top: 35, right: 60, bottom: 20, left: 60};
+      width = chartWidth - margin.left - margin.right;
+      height = 350 - margin.top - margin.bottom;
+
+      // create new svg container for the plot
+      var plot = d3.select("body")
+            .append("svg")
+            .attr("width", chartWidth)
+            .attr("height", 350)
+            .attr("class", "plot")
+            .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+       //list of attributes
+       var attr = ["$500 and under", "over $500",	"Public Peace Violation",	"Motor Vehicle Theft",
+                        "Financial Identity Theft", "Domestic"];
+
+        dimensions = d3.keys(csvData[0]).filter(function(csvData) {
+          return attr.indexOf(csvData) >= 0 })
+
+        var y = {}
+        for (i in dimensions) {
+          name = dimensions[i]
+          y[name] = d3.scaleLinear()
+            .domain( [0, 100] ) // axis range
+            .range([300, 0])
+        }
+         // scale for x-axi
+        x = d3.scalePoint()
+              .range([0, width])
+              .domain(dimensions);
+
+        // construct line generator
+        function path(csvData) {
+            return d3.line()(dimensions.map(function(p) {
+              return [x(p), y[p](csvData[p])];
+            }));
+        }
+
+        // add plot
+        plot.selectAll("body")
+            .data(csvData)
+            .enter()
+            .append("path")
+            .attr("d",  path)
+            .attr("class", function(d){
+                return "plot " + d.Neighborhood;
+            })
+            .style("opacity","0.5")
+            .style("fill", "none")
+            .style("stroke", "#3D3F3E");
+
+        plot.selectAll("body")
+          .data(dimensions).enter()
+          .append("g")
+          .attr("class", "plotAxis")
+          // transform each x-axis location to correct position
+          .attr("transform", function(d) { return "translate(" + x(d) + ")"; })
+          // builds axis with call function, add ticks for human readability
+          .each(function(d) { d3.select(this).call(d3.axisLeft().ticks(10).scale(y[d])); })
+          .append("text")
+          .attr("class","plotTitles")
+          .style("text-anchor", "middle")
+          .attr("y", -15) // format plot titles
+          .text(function(d) { return d; })
+          .style("fill", "Black");
 
   };
 
