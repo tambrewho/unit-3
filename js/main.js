@@ -87,6 +87,8 @@
           setParallelPlot(csvData);
           //create dropdown menu
           createDropdown(csvData);
+          //cite data Source
+          citation();
         };
   };
 
@@ -113,8 +115,7 @@
             };
         };
     };
-
-      return chicagoCrimes;
+    return chicagoCrimes;
   };
 
   //function to create color scale generator
@@ -196,7 +197,7 @@
         .attr("x", 40)
         .attr("y", 40)
         .attr("class", "chartTitle")
-        .text("Number of Crime Type " + expressed[3] + " in each region");
+        .text("Number of Crime Type " + expressed);
 
     //create vertical axis generator
     var yAxis = d3.axisLeft()
@@ -329,7 +330,7 @@ function updateChart(bars, n, colorScale){
 
     //add text to chart title
      var chartTitle = d3.select(".chartTitle")
-         .text("Number of Variable " + expressed[3] + " in each region");
+         .text("Chicago Crime Data Type: " + expressed + " (in thousands)");
 
   };
 
@@ -371,19 +372,19 @@ function updateChart(bars, n, colorScale){
   //function to create dynamic label
   function setLabel(props){
       //label content
-      var labelAttribute = "<h1>" + props[expressed] +
-          "</h1><b>" + expressed + "</b>";
+      var labelAttribute = "<h1>" + props[expressed] + "k" +
+          "</h1><b>" + expressed +"</b>" ;
 
       //create info label div
       var infolabel = d3.select("body")
           .append("div")
           .attr("class", "infolabel")
-          .attr("id", props.adm1_code + "_label")
+          .attr("id", props.Label + "_label")
           .html(labelAttribute);
 
       var regionName = infolabel.append("div")
           .attr("class", "labelname")
-          .html(props.name);
+          .html(props.Label);
   };
 
   //function to move info label with mouse
@@ -481,6 +482,20 @@ function updateChart(bars, n, colorScale){
           .text(function(d) { return d; })
           .style("fill", "Black");
 
+  };
+
+  // Data Source
+  function citation(){
+    var width = 200;
+    var height = 500;
+
+    // create element
+    var dataSource = d3.select("body")
+      .append("html")
+      .attr("class","dataSource")
+      .attr("width", width)
+      .attr("height", height)
+      .html("Data Source: <a href='https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2'>Chicago Crime Demographics: 2001 to Present</a>");
   };
 
 })();

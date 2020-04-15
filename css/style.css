@@ -1,13 +1,4 @@
 
-
-.axis path,
-.axis line {
-    fill: none;
-    stroke: black;
-    stroke-width: 1px;
-
-}
-
 .axis text {
     font-family: sans-serif;
     font-size: 0.9em;
@@ -58,20 +49,6 @@
     shape-rendering: crispEdges;
 }
 
-.axis path,
-.axis line {
-    fill: none;
-    stroke: #999;
-    stroke-width: 1px;
-    shape-rendering: crispEdges;
-}
-
-.axis text {
-    font-family: sans-serif;
-    font-size: 0.8em;
-    fill: #999;
-}
-
 .dropdown {
     position: absolute;
     top: 140px;
@@ -83,10 +60,6 @@
     padding: 2px;
     border: 1px solid #999;
     box-shadow: 2px 2px 4px #999;
-}
-
-option {
-    font-weight: normal;
 }
 
 .infolabel {
@@ -124,7 +97,9 @@ option {
     font-weight: 650;
 }
 
-
-a:link, a:visited {
-    color: #79a6cf;
+.dataSource{
+  font-size: 15px;
+  opacity: 0.7;
+  padding: 10px 0px 0px 20px;
+  display: left;
 }
